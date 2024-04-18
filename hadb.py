@@ -51,7 +51,7 @@ def action(r1, r2, c1, c2, vip, dev, h1, h2):
     elif standby:
         cmd = "sudo docker exec "+c2+" ip addr add "+vip+" dev "+dev
         sshcmd(h2, cmd, user='vmadm')
-        garp = "sudo docker exec "+c2+" arping -c 1 -A -I "+dev+" "+vip
+        garp = "sudo docker exec "+c2+" arping -c 1 -A "+arptarget
         m = sshcmd(h2, garp, user='vmadm')
         print(m)
 
