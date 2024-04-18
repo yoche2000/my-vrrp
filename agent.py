@@ -13,7 +13,7 @@ while not flag:
 
     # action(h1, h2, 'clab-HALB-LB1',  'clab-HALB-LB2', '10.10.10.101/24', 'eth2')
     for p in ha_list:
-        s = action(p[1], p[2], p[3], p[4], p[5], p[6])
+        s = action(p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8])
         if s == 'active':
             current = p[3]
         elif s == 'standby':

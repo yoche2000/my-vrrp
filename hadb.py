@@ -1,5 +1,17 @@
 import os
 import csv
+import subprocess
+
+def sshcmd(host, command, user=None, stdin=None, check=False):
+
+    where = "%s" % host if user is None else "%s@%s" %(user, host)
+    result = subprocess.run(["ssh", where, command],
+                           shell=False,
+                           stdin=stdin,
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE,
+                           check=check)
+    return result
 
 def get_ha_list(path):
     with open(path) as file_obj:
@@ -18,18 +30,23 @@ def health_check(ip):
 
     return pingstatus
 
-def action(h1, h2, c1, c2, vip, dev):
+def action(r1, r2, c1, c2, vip, dev, h1, h2):
     #h1 = active router IP, h2 = standby router IP
     #h3 = active container name, h4 = standby container name
     #h5 = virtual ip (endpoint), h6 = endpoint interface name
-    active = health_check(h1)
-    standby = health_check(h2)
+    active = health_check(r1)
+    standby = health_check(r2)
     if active:
-        os.system("sudo docker exec "+c1+" ip addr add "+vip+" dev "+dev)
-        os.system("sudo docker exec "+c2+" ip addr del "+vip+" dev "+dev)
+        cmd = "sudo docker exec "+c1+" ip addr add "+vip+" dev "+dev
+        sshcmd(h1, cmd, user='vmadm')
+
+        cmd = "sudo docker exec "+c2+" ip addr del "+vip+" dev "+dev
+        sshcmd(h2, cmd, user='vmadm')
         return "active"
+
     elif standby:
-        os.system("sudo docker exec "+c2+" ip addr add "+vip+" dev "+dev)
+        cmd = "sudo docker exec "+c2+" ip addr add "+vip+" dev "+dev
+        sshcmd(h2, cmd, user='vmadm')
         return "standby"
     else:
         return "failed"
