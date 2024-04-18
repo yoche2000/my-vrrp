@@ -36,9 +36,13 @@ def action(r1, r2, c1, c2, vip, dev, h1, h2):
     #h5 = virtual ip (endpoint), h6 = endpoint interface name
     active = health_check(r1)
     standby = health_check(r2)
+    arptarget= vip.split('/')[0]
     if active:
         cmd = "sudo docker exec "+c1+" ip addr add "+vip+" dev "+dev
+        garp = "sudo docker exec "+c1+" arping -c 1 -A "+arptarget
         sshcmd(h1, cmd, user='vmadm')
+        m = sshcmd(h2, garp, user='vmadm')
+        print(m)
 
         cmd = "sudo docker exec "+c2+" ip addr del "+vip+" dev "+dev
         sshcmd(h2, cmd, user='vmadm')
@@ -47,6 +51,10 @@ def action(r1, r2, c1, c2, vip, dev, h1, h2):
     elif standby:
         cmd = "sudo docker exec "+c2+" ip addr add "+vip+" dev "+dev
         sshcmd(h2, cmd, user='vmadm')
+        garp = "sudo docker exec "+c2+" arping -c 1 -A -I "+dev+" "+vip
+        m = sshcmd(h2, garp, user='vmadm')
+        print(m)
+
         return "standby"
     else:
         return "failed"
