@@ -19,6 +19,9 @@ def health_check(ip):
     return pingstatus
 
 def action(h1, h2, c1, c2, vip, dev):
+    #h1 = active router IP, h2 = standby router IP
+    #h3 = active container name, h4 = standby container name
+    #h5 = virtual ip (endpoint), h6 = endpoint interface name
     active = health_check(h1)
     standby = health_check(h2)
     if active:
