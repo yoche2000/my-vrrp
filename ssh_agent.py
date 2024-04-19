@@ -11,9 +11,12 @@ while not flag:
         for p in reader_obj:
             ha_list.append(p)
 
-    # action(h1, h2, '10.10.10.101/24', 'eth2', 'user1', 'user2')
+    #sudo option. When ssh controlling, allow the use of sudo by making it True
+    sudo = False
+
+    # action(192.168.1.3, 192.168.1.2, '10.10.10.101/24', 'eth2', 'root', 'root', sudo)
     for p in ha_list:
-        s = s_action(p[1], p[2], p[3], p[4], p[5], p[6])
+        s = s_action(p[1], p[2], p[3], p[4], p[5], p[6], sudo)
         if s == 'active':
             current = p[1]
         elif s == 'standby':

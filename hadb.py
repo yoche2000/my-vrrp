@@ -3,8 +3,9 @@ import csv
 import subprocess
 
 def sshcmd(host, command, user=None, stdin=None, check=False):
-
-    where = "%s" % host if user is None else "%s@%s" %(user, host)
+    host = host.strip()
+    where = user+"@"+ host
+    print("sssssssssssssssssssssssssssssssssssssss", where)
     result = subprocess.run(["ssh", where, command],
                            shell=False,
                            stdin=stdin,
@@ -27,10 +28,10 @@ def health_check(ip):
         pingstatus = True
     else:
         pingstatus = False
-
     return pingstatus
 
-def action(r1, r2, c1, c2, vip, dev, h1, h2):
+
+def d_action(r1, r2, c1, c2, vip, dev, h1, h2):
     #h1 = active router IP, h2 = standby router IP
     #h3 = active container name, h4 = standby container name
     #h5 = virtual ip (endpoint), h6 = endpoint interface name
@@ -58,3 +59,48 @@ def action(r1, r2, c1, c2, vip, dev, h1, h2):
         return "standby"
     else:
         return "failed"
+
+def s_action(r1, r2, vip, dev, u1, u2, sudo):
+    active = health_check(r1)
+    standby = health_check(r2)
+    arptarget= vip.split('/')[0]
+    if active:
+        if sudo:
+            cmd = "sudo ip addr add "+vip+" dev "+dev
+        else:
+            cmd = "ip addr add "+vip+" dev "+dev
+
+        if sudo:
+            garp = "sudo arping -c 1 -A "+arptarget
+        else:
+            garp = "arping -c 1 -A "+arptarget
+        sshcmd(r1, cmd, user=u1.strip())
+        m = sshcmd(r1, garp, user=u1.strip())
+        print(m)
+        
+        if sudo:
+            cmd = "sudo ip addr del "+vip+" dev "+dev
+        else:
+            cmd = "ip addr del "+vip+" dev "+dev
+        sshcmd(r2, cmd, user=u2.strip())
+        return "active"
+
+    elif standby:
+        if sudo:
+            cmd = "sudo ip addr add "+vip+" dev "+dev
+        else:
+            cmd = "ip addr add "+vip+" dev "+dev
+        sshcmd(r2, cmd, user=u2.strip())
+
+        if sudo:
+            garp = "sudo arping -c 1 -A "+arptarget
+        else:
+            garp = "arping -c 1 -A "+arptarget
+        m = sshcmd(r2, garp, user=u2.strip())
+        print(m)
+
+        return "standby"
+    else:
+        return "failed"
+
+
