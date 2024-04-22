@@ -39,20 +39,20 @@ def d_action(r1, r2, c1, c2, vip, dev, h1, h2):
     standby = health_check(r2)
     arptarget= vip.split('/')[0]
     if active:
-        cmd = "sudo docker exec "+c1+" ip addr add "+vip+" dev "+dev
-        garp = "sudo docker exec "+c1+" arping -c 1 -A "+arptarget
+        cmd = "sudo ip netns exec "+c1+" ip addr add "+vip+" dev "+dev
+        garp = "sudo ip netns exec "+c1+" arping -c 1 -A "+arptarget
         sshcmd(h1, cmd, user='vmadm')
         m = sshcmd(h2, garp, user='vmadm')
         print(m)
 
-        cmd = "sudo docker exec "+c2+" ip addr del "+vip+" dev "+dev
+        cmd = "sudo ip netns exec "+c2+" ip addr del "+vip+" dev "+dev
         sshcmd(h2, cmd, user='vmadm')
         return "active"
 
     elif standby:
-        cmd = "sudo docker exec "+c2+" ip addr add "+vip+" dev "+dev
+        cmd = "sudo ip netns exec "+c2+" ip addr add "+vip+" dev "+dev
         sshcmd(h2, cmd, user='vmadm')
-        garp = "sudo docker exec "+c2+" arping -c 1 -A "+arptarget
+        garp = "sudo ip netns exec "+c2+" arping -c 1 -A "+arptarget
         m = sshcmd(h2, garp, user='vmadm')
         print(m)
 
