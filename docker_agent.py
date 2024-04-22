@@ -1,4 +1,5 @@
 from hadb import *
+from time import time
 
 flag = False
 
@@ -9,10 +10,14 @@ while not flag:
     with open(path) as file_obj:
         reader_obj = csv.reader(file_obj)
         for p in reader_obj:
-            ha_list.append(p)
+            if not "#" in str(p):
+                ha_list.append(p)
 
-    # action(h1, h2, 'clab-HALB-LB1',  'clab-HALB-LB2', '10.10.10.101/24', 'eth2')
+    if not ha_list:
+        exit()
+
     for p in ha_list:
+        print(p)
         s = d_action(p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8])
         if s == 'active':
             current = p[3]

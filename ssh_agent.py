@@ -9,7 +9,11 @@ while not flag:
     with open(path) as file_obj:
         reader_obj = csv.reader(file_obj)
         for p in reader_obj:
-            ha_list.append(p)
+            if not "#" in str(p):
+                ha_list.append(p)
+
+    if not ha_list:
+        exit()
 
     #sudo option. When ssh controlling, allow the use of sudo by making it True
     sudo = False
